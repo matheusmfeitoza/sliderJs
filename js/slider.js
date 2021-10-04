@@ -19,7 +19,7 @@ export default class Slider {
     this.dist.movement = (this.dist.startX - clientX) * 1.6;
     return this.dist.finalDistance - this.dist.movement;
   }
-  onEnd(event) {
+  onEnd() {
     this.wrapper.removeEventListener("mousemove", this.onHoldClick);
     this.dist.finalDistance = this.movePosition;
   }
