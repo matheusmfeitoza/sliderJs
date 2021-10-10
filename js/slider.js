@@ -5,6 +5,10 @@ export default class Slider {
     this.dist = { finalDistance: 0, startX: 0, movement: 0 };
   }
 
+  transition(value) {
+    this.slider.style.transition = value ? "transform .3s" : "";
+  }
+
   onStart(event) {
     let typeEvent;
     if (event.type === "mousedown") {
@@ -16,6 +20,7 @@ export default class Slider {
       typeEvent = "touchmove";
     }
     this.wrapper.addEventListener(typeEvent, this.onHoldClick);
+    this.transition(false);
   }
   moveSlide(positionX) {
     this.movePosition = positionX;
@@ -30,6 +35,8 @@ export default class Slider {
     const typeEvent = event.type === "mouseup" ? "mousemove" : "touchmove";
     this.wrapper.removeEventListener(typeEvent, this.onHoldClick);
     this.dist.finalDistance = this.movePosition;
+    this.transition(true);
+    this.onMovement();
   }
   onHoldClick(event) {
     const eventClickType =
@@ -38,6 +45,16 @@ export default class Slider {
         : event.changedTouches[0].clientX;
     const posicao = this.salvaPosicao(eventClickType);
     this.moveSlide(posicao);
+  }
+
+  onMovement() {
+    if (this.dist.movement > 120 && this.index.next !== undefined) {
+      this.slideNextNav();
+    } else if (this.dist.movement < -120 && this.index.last !== undefined) {
+      this.slidePrevNav();
+    } else {
+      this.changeSlide(this.index.actual);
+    }
   }
 
   addEvents() {
@@ -69,7 +86,7 @@ export default class Slider {
     this.index = {
       last: index ? index - 1 : undefined,
       actual: index,
-      next: index === totalArray ? undefined : index,
+      next: index === totalArray ? undefined : index + 1,
     };
   }
 
@@ -80,9 +97,19 @@ export default class Slider {
     this.dist.finalDistance = activeSlide.position;
   }
 
+  slidePrevNav() {
+    if (this.index.last !== undefined) this.changeSlide(this.index.last);
+  }
+
+  slideNextNav() {
+    if (this.index.next !== undefined) this.changeSlide(this.index.next);
+  }
+
   init() {
     this.bindEvents();
+    this.transition(false);
     this.addEvents();
     this.slideConfig();
+    this.changeSlide(0);
   }
 }
